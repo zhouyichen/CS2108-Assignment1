@@ -74,4 +74,4 @@ class UI_class:
 
 
 root = Tk()
-window = UI_class(root,'dataset')
+window = UI_class(root,'dataset/train/data')

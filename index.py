@@ -21,19 +21,26 @@ cd = ColorDescriptor((8, 12, 3))
 # open the output index file for writing
 output = open(args["index"], "w")
 
+path_to_training_data = "dataset/train/data/"
+path_length = len(path_to_training_data)
+
 # use glob to grab the image paths and loop over them
-for imagePath in glob.glob(args["dataset"] + "/*.jpg"):
-	# extract the image ID (i.e. the unique filename) from the image
-	# path and load the image itself
-	imageID = imagePath[imagePath.rfind("/") + 1:]
-	image = cv2.imread(imagePath)
+for categoryPath in glob.glob(path_to_training_data + "*"):
+	category = categoryPath[path_length:]
+	for imagePath in glob.glob(categoryPath + "/*.jpg"):
+		
+		# extract the image ID (i.e. the unique filename) from the image
+		# path and load the image itself
+		imageID = category + "/" + imagePath[imagePath.rfind("/") + 1:]
+		image = cv2.imread(imagePath)
 
-	# describe the image
-	features = cd.describe(image)
+		# describe the image
+		features = cd.describe(image)
 
-	# write the features to file
-	features = [str(f) for f in features]
-	output.write("%s,%s\n" % (imageID, ",".join(features)))
+		# write the features to file
+		features = [str(f) for f in features]
+		output.write("%s,%s\n" % (imageID, ",".join(features)))
+		
 
 # close the index file
 output.close()
