@@ -2,10 +2,9 @@
 # python index.py --dataset dataset --index index.csv
 
 # import the necessary packages
-from pyimagesearch.colordescriptor import ColorDescriptor
+import params
 import argparse
 import glob
-import cv2
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -16,7 +15,7 @@ ap.add_argument("-i", "--index", required = False, default='index.csv',
 args = vars(ap.parse_args())
 
 # initialize the color descriptor
-cd = ColorDescriptor((8, 12, 3))
+cd = params.cd
 
 # open the output index file for writing
 output = open(args["index"], "w")

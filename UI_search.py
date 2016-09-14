@@ -1,7 +1,6 @@
 # import the necessary packages
-from pyimagesearch.colordescriptor import ColorDescriptor
+import params
 from pyimagesearch.searcher import Searcher
-import cv2
 from Tkinter import *
 import tkFileDialog
 from PIL import Image, ImageTk
@@ -33,7 +32,7 @@ class UI_class:
 
         # process query image to feature vector
         # initialize the image descriptor
-        cd = ColorDescriptor((8, 12, 3))
+        cd = params.cd
         # load the query image and describe it
         query = cv2.imread(self.filename)
         self.queryfeatures = cd.describe(query)
