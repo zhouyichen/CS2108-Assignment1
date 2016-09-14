@@ -24,10 +24,6 @@ class UI_class:
 
 
     def browse_query_img(self):
-
-        self.query_img_frame = Frame(self.master)
-        self.query_img_frame.pack()
-        from tkFileDialog import askopenfilename
         self.filename = tkFileDialog.askopenfile(title='Choose an Image File').name
 
         # process query image to feature vector
@@ -39,6 +35,13 @@ class UI_class:
         image_file = Image.open(self.filename)
         resized = image_file.resize((100, 100), Image.ANTIALIAS)
         im = ImageTk.PhotoImage(resized)
+
+        if hasattr(self, 'query_img_frame'):
+            self.query_img_frame.pack_forget()
+            self.result_img_frame.pack_forget()
+        self.query_img_frame = Frame(self.master)
+        self.query_img_frame.pack()
+
         image_label = Label(self.query_img_frame, image=im)
         image_label.pack()
 
