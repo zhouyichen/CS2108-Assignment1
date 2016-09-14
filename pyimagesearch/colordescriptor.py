@@ -47,7 +47,7 @@ class ColorDescriptor:
 		features.extend(hist)
 
 		# return the feature vector
-		return features
+		return np.array(features)
 
 	def histogram(self, image, mask):
 		# extract a 3D color histogram from the masked region of the

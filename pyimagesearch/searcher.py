@@ -22,7 +22,7 @@ class Searcher:
 				# parse out the image ID and features, then compute the
 				# chi-squared distance between the features in our index
 				# and our query features
-				features = [float(x) for x in row[1:]]
+				features = np.array(row[1:], dtype = np.dtype(float))
 				d = self.chi2_distance(features, queryFeatures)
 
 				# now that we have the distance between the two feature
@@ -44,8 +44,7 @@ class Searcher:
 
 	def chi2_distance(self, histA, histB, eps = 1e-10):
 		# compute the chi-squared distance
-		d = 0.5 * np.sum([((a - b) ** 2) / (a + b + eps)
-			for (a, b) in zip(histA, histB)])
+		d =  0.5 * np.sum(np.square(histA - histB) / (histA + histB + eps))
 
 		# return the chi-squared distance
 		return d
