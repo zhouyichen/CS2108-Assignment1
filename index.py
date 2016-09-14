@@ -2,7 +2,7 @@
 # python index.py --dataset dataset --index index.csv
 
 # import the necessary packages
-import params
+from params import *
 import argparse
 import glob
 
@@ -13,9 +13,6 @@ ap.add_argument("-d", "--dataset", required = False, default='dataset',
 ap.add_argument("-i", "--index", required = False, default='index.csv',
 	help = "Path to where the computed index will be stored")
 args = vars(ap.parse_args())
-
-# initialize the color descriptor
-cd = params.cd
 
 # open the output index file for writing
 output = open(args["index"], "w")

@@ -1,5 +1,5 @@
 # import the necessary packages
-import params
+from params import *
 from pyimagesearch.searcher import Searcher
 from Tkinter import *
 import tkFileDialog
@@ -31,8 +31,6 @@ class UI_class:
         self.filename = tkFileDialog.askopenfile(title='Choose an Image File').name
 
         # process query image to feature vector
-        # initialize the image descriptor
-        cd = params.cd
         # load the query image and describe it
         query = cv2.imread(self.filename)
         self.queryfeatures = cd.describe(query)
