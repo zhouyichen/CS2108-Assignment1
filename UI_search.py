@@ -53,7 +53,7 @@ class UI_class:
         self.result_img_frame.pack()
 
         # perform the search
-        searcher = Searcher("index.csv")
+        searcher = Searcher(color_hist_data)
         results = searcher.search(self.queryfeatures)
 
         # show result pictures

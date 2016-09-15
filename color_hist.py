@@ -10,7 +10,7 @@ import glob
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--dataset", required = False, default='dataset',
 	help = "Path to the directory that contains the images to be indexed")
-ap.add_argument("-i", "--index", required = False, default='index.csv',
+ap.add_argument("-i", "--index", required = False, default=color_hist_data,
 	help = "Path to where the computed index will be stored")
 args = vars(ap.parse_args())
 
