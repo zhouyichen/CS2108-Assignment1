@@ -9,3 +9,5 @@ cd = ColorDescriptor((9, 16, 4))
 color_hist_data = "colorHist.csv"
 
 deep_learning_data = "deepLearning.csv"
+
+sift_data = "siftDescriptors.csv"
