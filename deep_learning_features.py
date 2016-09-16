@@ -68,7 +68,7 @@ tf.app.flags.DEFINE_integer('num_top_predictions', 5,
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
 # pylint: enable=line-too-long
 
-output = open(deep_learning_data, "w")
+
 
 def create_graph():
   """Creates a graph from saved GraphDef file and returns a saver."""
@@ -80,16 +80,10 @@ def create_graph():
     _ = tf.import_graph_def(graph_def, name='')
 
 
-def run_inference_on_images(path_to_training_data):
-  """Runs inference on images under a the path to the training set.
-
-  Args:
-    path_to_training_data: path to training data.
-
-  Returns:
-    Nothing
+def run_inference_on_images(output_file, input_path):
+  """Runs inference on images under a the path to the image set.
   """
-
+  output = open(output_file, "w")
   # Creates graph from saved GraphDef.
   create_graph()
 
@@ -103,10 +97,10 @@ def run_inference_on_images(path_to_training_data):
     #   encoding of the image.
     # Runs the softmax tensor by feeding the image_data as input to the graph.
     softmax_tensor = sess.graph.get_tensor_by_name('softmax:0')
+    path_length = len(input_path)
 
-    path_length = len(path_to_training_data)
     # use glob to grab the image paths and loop over them
-    for categoryPath in glob.glob(path_to_training_data + "*"):
+    for categoryPath in glob.glob(input_path + "*"):
       category = categoryPath[path_length:]
       for imagePath in glob.glob(categoryPath + "/*.jpg"):
         
@@ -153,7 +147,8 @@ def maybe_download_and_extract():
 def main(_):
   maybe_download_and_extract()
   
-  run_inference_on_images(path_to_training_data)
+  run_inference_on_images(deep_learning_train_data, path_to_training_data)
+  run_inference_on_images(deep_learning_test_data, path_to_testing_data)
 
 if __name__ == '__main__':
   tf.app.run()

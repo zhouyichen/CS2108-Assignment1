@@ -2,12 +2,16 @@ from pyimagesearch.colordescriptor import ColorDescriptor
 import cv2 as cv2
 
 path_to_training_data = "dataset/train/data/"
-path_length = len(path_to_training_data)
+path_to_testing_data = "dataset/test/data/"
 
 # initialize the color descriptor
 cd = ColorDescriptor((9, 16, 4))
-color_hist_data = "colorHist.csv"
 
-deep_learning_data = "deepLearning.csv"
+color_hist_train_data = "colorHist_train.csv"
+color_hist_test_data = "colorHist_test.csv"
 
-sift_data = "siftDescriptors.csv"
+deep_learning_train_data = "deepLearning_train.csv"
+deep_learning_test_data = "deepLearning_test.csv"
+
+sift_train_data = "siftDescriptors_train.csv"
+sift_test_data = "siftDescriptors_test.csv"
