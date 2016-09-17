@@ -1,11 +1,7 @@
 from params import *
 import glob
+from pyimagesearch.sift_searcher import extract_sift
 
-def extract_sift(image):
-	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-	sift = cv2.SIFT(nfeatures = 50)
-	kp, des = sift.detectAndCompute(gray, None)
-	return des[:50].flatten()
 
 def sift_on_data(output_file, input_path):
 	# open the output file for writing
@@ -22,7 +18,7 @@ def sift_on_data(output_file, input_path):
 			image = cv2.imread(imagePath)
 
 			# describe the image
-			features = extract_sift(image)
+			features = extract_sift(image).flatten()
 
 			# write the features to file
 			features = [str(f) for f in features]
