@@ -1,6 +1,6 @@
 from params import *
 import glob
-from pyimagesearch.sift_searcher import extract_sift
+from pyimagesearch.bow_searcher import extract_sift
 
 
 def sift_on_data(output_file, input_path):

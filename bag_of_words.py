@@ -5,7 +5,6 @@ from scipy.cluster.vq import *
 from sklearn.preprocessing import StandardScaler
 from params import *
 import glob
-from pyimagesearch.sift_searcher import extract_sift
 import csv
 
 def bow_on_data(output_file, cluster_data):
