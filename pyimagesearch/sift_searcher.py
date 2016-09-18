@@ -5,9 +5,9 @@ import cv2
 
 def extract_sift(image):
 	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-	sift = cv2.SIFT(nfeatures = 50)
+	sift = cv2.SIFT()
 	kp, des = sift.detectAndCompute(gray, None)
-	return des[:50]
+	return des
 
 class SIFT_Searcher:
 	def __init__(self, indexPath):
