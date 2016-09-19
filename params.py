@@ -5,7 +5,7 @@ path_to_training_data = "dataset/train/data/"
 path_to_testing_data = "dataset/test/data/"
 
 # initialize the color descriptor
-cd = ColorDescriptor((9, 16, 4))
+cd = ColorDescriptor((18, 3, 3))
 
 color_hist_train_data = "colorHist_train.csv"
 color_hist_test_data = "colorHist_test.csv"
