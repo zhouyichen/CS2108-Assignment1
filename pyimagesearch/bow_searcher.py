@@ -6,6 +6,7 @@ from sklearn.externals import joblib
 from scipy.cluster.vq import *
 from sklearn.preprocessing import StandardScaler
 import glob
+import sys
 
 def extract_sift(image):
 	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -53,8 +54,9 @@ class BOW_Searcher:
 
 # for testing purpose
 if __name__ == "__main__":
-	query_image = cv2.imread("../dataset/train/data/bear/0209_151498777.jpg")
-	bow_searcher = BOW_Searcher("../bow180.pkl")
+	k = int(sys.argv[1])
+	query_image = cv2.imread("../dataset/test/data/plane/0427_1308585041.jpg")
+	bow_searcher = BOW_Searcher("../bow" + str(k) + ".pkl")
 	results = bow_searcher.search(query_image)
 	for i in results:
 		print i

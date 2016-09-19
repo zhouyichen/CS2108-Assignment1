@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from params import *
 import glob
 import csv
+import sys
 
 def bow_on_data(output_file, cluster_data):
 
@@ -25,5 +26,5 @@ def bow_on_data(output_file, cluster_data):
 	joblib.dump((image_ids, im_features, k, voc), output_file, compress=3)
 
 if __name__ == "__main__":
-	k = 150
+	k = int(sys.argv[1])
 	bow_on_data("bow" + str(k) + ".pkl", "sift_cluster_" + str(k) + ".pkl")

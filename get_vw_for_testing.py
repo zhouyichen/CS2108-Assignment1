@@ -8,6 +8,7 @@ from params import *
 import glob
 from pyimagesearch.bow_searcher import search_for_match
 import csv
+import sys
 
 def get_visual_keywords(output_file, sift_data, sift_bow_data):
     # Load the classifier, class names, scaler, number of clusters and vocabulary 
@@ -65,7 +66,7 @@ def get_visual_keywords(output_file, sift_data, sift_bow_data):
     output.close()
 
 if __name__ == "__main__":
-    k = 150
+    k = int(sys.argv[1])
     get_visual_keywords("vw_predictions" + str(k) + ".csv", sift_test_data, "bow" + str(k) + ".pkl")
 
 
