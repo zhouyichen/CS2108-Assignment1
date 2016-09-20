@@ -1,9 +1,17 @@
 # import the necessary packages
 from params import *
-from pyimagesearch.color_hist_searcher import ColorHistSearcher
+from pyimagesearch.color_hist_searcher import *
+from pyimagesearch.bow_searcher import *
 from Tkinter import *
 import tkFileDialog
 from PIL import Image, ImageTk
+
+def combine_results(image_ids, results):
+    final_result = {}
+    for image_id in image_ids:
+        score = reduce(lambda x, y: x*y, (r[image_id] for r in results))
+        final_result[image_id] = score
+    return final_result
 
 class UI_class:
     def __init__(self, master, search_path):
@@ -11,6 +19,10 @@ class UI_class:
         self.master = master
         topframe = Frame(self.master)
         topframe.pack()
+
+        self.color_hist_searcher = ColorHistSearcher(color_hist_train_data)
+        self.bow_searcher = BOW_Searcher(bow_train_data)
+        self.image_ids = self.bow_searcher.image_ids
 
         #Buttons
         topspace = Label(topframe).grid(row=0, columnspan=2)
@@ -21,6 +33,7 @@ class UI_class:
         downspace = Label(topframe).grid(row=3, columnspan=4)
 
         self.master.mainloop()
+
 
 
     def browse_query_img(self):
@@ -53,13 +66,17 @@ class UI_class:
         self.result_img_frame.pack()
 
         # perform the search
-        color_hist_searcher = ColorHistSearcher(color_hist_train_data)
-        results = color_hist_searcher.search(self.queryfeatures)
+        
+        color_results = self.color_hist_searcher.search(self.queryfeatures)
+        bow_results = self.bow_searcher.search(self.query)
+
+        results = combine_results(self.image_ids, (color_results, bow_results))
+        results = sorted([(v, k) for (k, v) in bow_results.items()])
 
         # show result pictures
         COLUMNS = 5
         image_count = 0
-        for (score, resultID) in results:
+        for (score, resultID) in results[:20]:
             # load the result image and display it
             image_count += 1
             r, c = divmod(image_count - 1, COLUMNS)

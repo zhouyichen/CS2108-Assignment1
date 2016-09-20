@@ -18,3 +18,5 @@ visual_concept_test_data = "visualConcept_test.csv"
 
 sift_train_data = "siftDescriptors_train.csv"
 sift_test_data = "siftDescriptors_test.csv"
+
+bow_train_data = "bow250.pkl"
