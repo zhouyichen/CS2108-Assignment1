@@ -68,7 +68,67 @@ tf.app.flags.DEFINE_integer('num_top_predictions', 5,
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
 # pylint: enable=line-too-long
 
+class NodeLookup(object):
+  """Converts integer node ID's to human readable labels."""
 
+  def __init__(self,
+               label_lookup_path=None,
+               uid_lookup_path=None):
+    if not label_lookup_path:
+      label_lookup_path = os.path.join(
+          FLAGS.model_dir, 'imagenet_2012_challenge_label_map_proto.pbtxt')
+    if not uid_lookup_path:
+      uid_lookup_path = os.path.join(
+          FLAGS.model_dir, 'imagenet_synset_to_human_label_map.txt')
+    self.node_lookup = self.load(label_lookup_path, uid_lookup_path)
+
+  def load(self, label_lookup_path, uid_lookup_path):
+    """Loads a human readable English name for each softmax node.
+    Args:
+      label_lookup_path: string UID to integer node ID.
+      uid_lookup_path: string UID to human-readable string.
+    Returns:
+      dict from integer node ID to human-readable string.
+    """
+    if not tf.gfile.Exists(uid_lookup_path):
+      tf.logging.fatal('File does not exist %s', uid_lookup_path)
+    if not tf.gfile.Exists(label_lookup_path):
+      tf.logging.fatal('File does not exist %s', label_lookup_path)
+
+    # Loads mapping from string UID to human-readable string
+    proto_as_ascii_lines = tf.gfile.GFile(uid_lookup_path).readlines()
+    uid_to_human = {}
+    p = re.compile(r'[n\d]*[ \S,]*')
+    for line in proto_as_ascii_lines:
+      parsed_items = p.findall(line)
+      uid = parsed_items[0]
+      human_string = parsed_items[2]
+      uid_to_human[uid] = human_string
+
+    # Loads mapping from string UID to integer node ID.
+    node_id_to_uid = {}
+    proto_as_ascii = tf.gfile.GFile(label_lookup_path).readlines()
+    for line in proto_as_ascii:
+      if line.startswith('  target_class:'):
+        target_class = int(line.split(': ')[1])
+      if line.startswith('  target_class_string:'):
+        target_class_string = line.split(': ')[1]
+        node_id_to_uid[target_class] = target_class_string[1:-2]
+
+    # Loads the final mapping of integer node ID to human-readable string
+    node_id_to_name = {}
+    for key, val in node_id_to_uid.items():
+      if val not in uid_to_human:
+        tf.logging.fatal('Failed to locate: %s', val)
+      name = uid_to_human[val]
+      node_id_to_name[key] = name
+
+    return node_id_to_name
+
+  def id_to_string(self, node_id):
+    if node_id not in self.node_lookup:
+      return ''
+    return self.node_lookup[node_id]
 
 def create_graph():
   """Creates a graph from saved GraphDef file and returns a saver."""
@@ -80,10 +140,11 @@ def create_graph():
     _ = tf.import_graph_def(graph_def, name='')
 
 
-def run_inference_on_images(output_file, input_path):
+def run_inference_on_images(dl_output_file, vc_output_file, input_path):
   """Runs inference on images under a the path to the image set.
   """
-  output = open(output_file, "w")
+  dl_output = open(dl_output_file, "w")
+  vc_output = open(vc_output_file, "w")
   # Creates graph from saved GraphDef.
   create_graph()
 
@@ -114,10 +175,20 @@ def run_inference_on_images(output_file, input_path):
                                {'DecodeJpeg/contents:0': image_data})
         predictions = np.squeeze(predictions)
 
-        # write the features to file
+        # write the scores to dl_output file
         features = [str(f) for f in predictions]
-        output.write("%s,%s\n" % (imageID, ",".join(features)))
+        dl_output.write("%s,%s\n" % (imageID, ",".join(features)))
 
+
+        node_lookup = NodeLookup()
+
+        top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
+        vc_output.write(imageID)
+        for node_id in top_k:
+          human_string = node_lookup.id_to_string(node_id)
+          score = predictions[node_id]
+          vc_output.write(',"%s", %s' % (human_string, score))
+        vc_output.write("\n")
 
     # print("Vector length: ", len(predictions))
 
@@ -147,8 +218,8 @@ def maybe_download_and_extract():
 def main(_):
   maybe_download_and_extract()
   
-  run_inference_on_images(deep_learning_train_data, path_to_training_data)
-  run_inference_on_images(deep_learning_test_data, path_to_testing_data)
+  run_inference_on_images(deep_learning_train_data, visual_concept_train_data, path_to_training_data)
+  run_inference_on_images(deep_learning_test_data, visual_concept_test_data, path_to_testing_data)
 
 if __name__ == '__main__':
   tf.app.run()
