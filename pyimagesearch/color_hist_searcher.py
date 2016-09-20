@@ -3,7 +3,7 @@ import numpy as np
 import csv
 import cv2
 
-class Searcher:
+class ColorHistSearcher:
 	def __init__(self, indexPath):
 		# store our index path
 		self.indexPath = indexPath

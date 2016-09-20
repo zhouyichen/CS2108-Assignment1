@@ -1,6 +1,6 @@
 # import the necessary packages
 from params import *
-from pyimagesearch.searcher import Searcher
+from pyimagesearch.color_hist_searcher import ColorHistSearcher
 from Tkinter import *
 import tkFileDialog
 from PIL import Image, ImageTk
@@ -28,8 +28,8 @@ class UI_class:
 
         # process query image to feature vector
         # load the query image and describe it
-        query = cv2.imread(self.filename)
-        self.queryfeatures = cd.describe(query)
+        self.query = cv2.imread(self.filename)
+        self.queryfeatures = cd.describe(self.query)
 
         # show query image
         image_file = Image.open(self.filename)
@@ -53,8 +53,8 @@ class UI_class:
         self.result_img_frame.pack()
 
         # perform the search
-        searcher = Searcher(color_hist_train_data)
-        results = searcher.search(self.queryfeatures)
+        color_hist_searcher = ColorHistSearcher(color_hist_train_data)
+        results = color_hist_searcher.search(self.queryfeatures)
 
         # show result pictures
         COLUMNS = 5
