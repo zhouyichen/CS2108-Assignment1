@@ -60,7 +60,7 @@ def get_visual_keywords(output_file, sift_data, sift_bow_data):
     output = open(output_file, "w")
     for i in range(len(test_features)):
         results = search_for_match(image_ids, im_features, test_features[i])[:20]
-        results = [str(f) for f in results]
+        results = [str(w) for f in results for w in f]
         output.write("%s,%s\n" % (des_list[i][0], ",".join(results)))        
 
     output.close()
