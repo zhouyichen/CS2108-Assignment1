@@ -1,5 +1,5 @@
 # import the necessary packages
-import numpy as np
+from chi2_distance import *
 import csv
 import cv2
 from sklearn.externals import joblib
@@ -23,9 +23,6 @@ def search_for_match(image_ids, im_features, test_features, weight):
     # results = sorted([(v, k) for (k, v) in results.items()])
     return results
 
-def chi2_distance(histA, histB, eps = 1e-10):
-    # compute the chi-squared distance
-    return 0.5 * np.sum(np.square(histA - histB) / (histA + histB + eps))
 
 class BOW_Searcher:
 	def __init__(self, sift_bow_data):

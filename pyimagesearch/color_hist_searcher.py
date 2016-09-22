@@ -1,5 +1,5 @@
 # import the necessary packages
-import numpy as np
+from chi2_distance import *
 import csv
 
 class ColorHistSearcher:
@@ -15,7 +15,7 @@ class ColorHistSearcher:
 			# loop over the rows in the index
 			for row in reader:
 				self.features_list.append(row)
-				
+
 			# close the reader
 			f.close()
 
@@ -27,7 +27,7 @@ class ColorHistSearcher:
 		for row in self.features_list:
 
 			features = np.array(row[1:], dtype = np.dtype(float))
-			d = self.chi2_distance(features, queryFeatures)
+			d = chi2_distance(features, queryFeatures)
 
 			# now that we have the distance between the two feature
 			# vectors, we can udpate the results dictionary -- the
@@ -42,10 +42,3 @@ class ColorHistSearcher:
 
 		# return our (limited) results
 		return results
-
-	def chi2_distance(self, histA, histB, eps = 1e-10):
-		# compute the chi-squared distance
-		d =  0.5 * np.sum(np.square(histA - histB) / (histA + histB + eps))
-
-		# return the chi-squared distance
-		return d
