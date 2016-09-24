@@ -93,10 +93,12 @@ class NodeLookup(object):
 
 
 class DeepLearningSearcher(object):
-	def __init__(self, deep_learning_data):
+	def __init__(self, deep_learning_data, visual_concept_data):
 		# store our index path
 		self.deep_learning_data = deep_learning_data
+		self.visual_concept_data = visual_concept_data
 		self.dp_list = []
+		self.vc_list = []
 		self.node_lookup = NodeLookup()
 
 		with open(self.deep_learning_data) as f:
@@ -106,6 +108,17 @@ class DeepLearningSearcher(object):
 			# loop over the rows in the index
 			for row in reader:
 				self.dp_list.append(row)
+				
+			# close the reader
+			f.close()
+
+		with open(self.visual_concept_data) as f:
+			# initialize the CSV reader
+			reader = csv.reader(f)
+
+			# loop over the rows in the index
+			for row in reader:
+				self.vc_list.append(row)
 				
 			# close the reader
 			f.close()
@@ -131,29 +144,41 @@ class DeepLearningSearcher(object):
 			self.sess = sess
 
 
-	def run_inference_on_image(self, input_path):
-	    # extract the image ID (i.e. the unique filename) from the image
-	    # path and load the image itself
+	def run_inference_on_image(self, input_path, dp=True, vc=True):
+		'''
+			dp and vc are two flags indicating whether to run evaluation using DP or VC.
+			When only one of them is true, a tuple of one element is returned
+		'''
+		# extract the image ID (i.e. the unique filename) from the image
+		# path and load the image itself
 
-	    # describe the image
-	    image_data = tf.gfile.FastGFile(input_path, 'rb').read()
-	    predictions = self.sess.run(self.softmax_tensor,
-	                           {'DecodeJpeg/contents:0': image_data})
-	    predictions = np.squeeze(predictions)
+		# describe the image
+		image_data = tf.gfile.FastGFile(input_path, 'rb').read()
+		predictions = self.sess.run(self.softmax_tensor,
+		                     {'DecodeJpeg/contents:0': image_data})
+		predictions = np.squeeze(predictions)
 
-	    dp_match_results = self.search_by_deep_learning(predictions)
+		if not vc:
+		  return (self.search_by_deep_learning(predictions),)
 
+		if not dp:
+		  visual_concepts = []
+		  top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
+		  for node_id in top_k:
+		  	human_string = self.node_lookup.id_to_string(node_id)
+		  	score = predictions[node_id]
+		  	visual_concepts.append([human_string, score])
+		  return (self.search_by_visual_concepts(visual_concepts),)
 
-	    visual_concepts = []
-
-	    top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
-
-	    for node_id in top_k:
+		dp_match_results = self.search_by_deep_learning(predictions)
+		visual_concepts = []
+		top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
+		for node_id in top_k:
 			human_string = self.node_lookup.id_to_string(node_id)
 			score = predictions[node_id]
 			visual_concepts.append([human_string, score])
-
-	    return (dp_match_results, visual_concepts)
+			vc_match_results = self.search_by_visual_concepts(visual_concepts)
+		return (dp_match_results, vc_match_results)
 
 	def search_by_deep_learning(self, queryFeatures, weight=1):
 		results = {}
@@ -162,6 +187,25 @@ class DeepLearningSearcher(object):
 			d = np.linalg.norm(queryFeatures - features)
 
 			results[row[0]] = d * weight
+		return results
+
+	def search_by_visual_concepts(self, visual_concepts, weight = 1):
+		results = {}
+		for row in self.vc_list:
+			train_vc_raw = row[1:]
+			train_vc = [[train_vc_raw[x], float(train_vc_raw[x+1])] for x in range(0, len(row)-1, 2)]
+
+			'''
+			train_vc and visual_concepts have the same format:
+				List containing 5 elements, each element is a list containing:
+					visual_concept_string and probablity_of_the_concept
+				Both train_vc and visual_concepts are sorted according to the score
+			The distance should be calculated based on train_vc and visual_concepts.
+			Lower distance represents better match between the two images
+			'''
+			distance = 1.0 # to be fixed
+
+			results[row[0]] = distance * weight
 		return results
 
 
