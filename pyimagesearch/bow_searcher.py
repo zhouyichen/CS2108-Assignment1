@@ -17,10 +17,8 @@ def extract_sift(image):
 def search_for_match(image_ids, im_features, test_features, weight):
     results = {}
     for i in range(len(im_features)):
-        d = chi2_distance(im_features[i], test_features)
+        d = np.linalg.norm(im_features[i] - test_features)
         results[image_ids[i]] = d * weight
-
-    # results = sorted([(v, k) for (k, v) in results.items()])
     return results
 
 
@@ -43,7 +41,7 @@ class BOW_Searcher:
 		words, distance = vq(query_features, self.voc)
 		for w in words:
 			test_features[w] += 1
-		test_features = cv2.normalize(test_features).T
+		# test_features = cv2.normalize(test_features).T
 
 		results = search_for_match(self.image_ids, self.im_features, test_features, weight)
 
