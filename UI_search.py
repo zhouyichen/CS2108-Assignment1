@@ -75,7 +75,11 @@ class UI_class:
         bow_results = self.bow_searcher.search(self.query)
         dp_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
 
-        results = combine_results(self.image_ids, (color_results, bow_results, dp_results))
+        '''put the results from different features into the list below using append'''
+        results_list = []
+        results_list.append(dp_results)
+
+        results = combine_results(self.image_ids, results_list)
         results = sorted([(v, k) for (k, v) in results.items()])
 
         # show result picturesdp_results
