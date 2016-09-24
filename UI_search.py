@@ -45,7 +45,7 @@ class UI_class:
         for feature in feature_options:
             self.listbox.insert(END, feature)
         self.listbox.grid(row=1, column=2)
-        self.cbutton = Button(topframe, text=" Search ", command= self.show_results_imgs)
+        self.cbutton = Button(topframe, text=" Search ", command=self.show_results_imgs)
         self.cbutton.grid(row=1, column=3)
         downspace = Label(topframe).grid(row=3, columnspan=4)
 
@@ -104,13 +104,13 @@ class UI_class:
         if features[1]: # Visual Keywords
             vw_results = self.bow_searcher.search(self.query)
             results_list.append(vw_results)
-        if features[2] or features[3]:
+        if features[2] and features[3]: # Visual Concept and Deep Learning
             dp_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
-            if features[2]: # Visual Concept
-                results_list.append(vc_results)
-            if features[3]: # Deep Learning
-                results_list.append(dp_results)
-
+            results_list.append(vc_results)
+            results_list.append(dp_results)
+        elif features[2] or features[3]: # Visual Concept or Deep Learning
+            results_list.append(self.deep_learning_searcher.run_inference_on_image(self.filename, features[3], features[2])[0])
+                
         results = combine_results(self.image_ids, results_list)
         results = sorted([(v, k) for (k, v) in results.items()])
 
