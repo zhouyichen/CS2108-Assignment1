@@ -21,7 +21,7 @@ def bow_on_data(output_file, cluster_data):
 	    words, distance = vq(des_list[i], voc)
 	    for w in words:
 	        im_features[i, w] += 1
-	    # im_features[i, :] = cv2.normalize(im_features[i, :]).T
+	    im_features[i, :] = cv2.normalize(im_features[i, :]).T
 
 	joblib.dump((image_ids, im_features, k, voc), output_file, compress=3)
 
