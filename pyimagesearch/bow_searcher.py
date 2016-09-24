@@ -14,7 +14,7 @@ def extract_sift(image):
 	kp, des = sift.detectAndCompute(gray, None)
 	return des
 
-def search_for_match(image_ids, im_features, test_features, weight):
+def search_for_match(image_ids, im_features, test_features, weight=1):
     results = {}
     for i in range(len(im_features)):
         d = np.linalg.norm(im_features[i] - test_features)
