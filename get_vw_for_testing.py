@@ -10,7 +10,7 @@ from pyimagesearch.bow_searcher import search_for_match
 import csv
 import sys
 
-def get_visual_keywords(output_file, sift_data, sift_bow_data):
+def get_vw_for_testing(output_file, sift_data, sift_bow_data):
     # Load the classifier, class names, scaler, number of clusters and vocabulary 
     image_ids, im_features, k, voc = joblib.load(sift_bow_data)
 
@@ -59,14 +59,14 @@ def get_visual_keywords(output_file, sift_data, sift_bow_data):
 
     output = open(output_file, "w")
     for i in range(len(test_features)):
-        results = search_for_match(image_ids, im_features, test_features[i])[:20]
+        results = search_for_match(image_ids, im_features, test_features[i])
+        results = sorted([(v, k) for (k, v) in results.items()])
         results = [str(w) for f in results for w in f]
         output.write("%s,%s\n" % (des_list[i][0], ",".join(results)))        
 
     output.close()
 
 if __name__ == "__main__":
-    k = int(sys.argv[1])
-    get_visual_keywords("vw_predictions" + str(k) + ".csv", sift_test_data, "bow" + str(k) + ".pkl")
+    get_vw_for_testing(vw_results, sift_test_data, "bow250.pkl")
 
 
