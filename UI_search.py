@@ -5,6 +5,7 @@ from pyimagesearch.bow_searcher import *
 from pyimagesearch.deep_learning_searcher import *
 from Tkinter import *
 import tkFileDialog
+import tkMessageBox
 from PIL import Image, ImageTk
 
 def combine_results(image_ids, results):
@@ -33,8 +34,19 @@ class UI_class:
         topspace = Label(topframe).grid(row=0, columnspan=2)
         self.bbutton= Button(topframe, text=" Choose an image ", command=self.browse_query_img)
         self.bbutton.grid(row=1, column=1)
-        self.cbutton = Button(topframe, text=" Search ", command=self.show_results_imgs)
-        self.cbutton.grid(row=1, column=2)
+        feature_options = [
+            "Color Histogram", 
+            "Visual Keywords",
+            "Visual Concept",
+            "Deep Learning",
+            "Text"
+        ]
+        self.listbox = Listbox(topframe, selectmode=MULTIPLE)
+        for feature in feature_options:
+            self.listbox.insert(END, feature)
+        self.listbox.grid(row=1, column=2)
+        self.cbutton = Button(topframe, text=" Search ", command= self.show_results_imgs)
+        self.cbutton.grid(row=1, column=3)
         downspace = Label(topframe).grid(row=3, columnspan=4)
 
         self.master.mainloop()
@@ -66,18 +78,38 @@ class UI_class:
 
 
     def show_results_imgs(self):
+        if not hasattr(self, 'query'):
+            tkMessageBox.showinfo("Error", "Please choose an image")
+            return  
+
+        selected_features = self.listbox.curselection()
+        if len(selected_features) == 0:
+            tkMessageBox.showinfo("Error", "Please select at least one feature")
+            return
+
+        if hasattr(self, 'result_img_frame'):
+            self.result_img_frame.pack_forget()
         self.result_img_frame = Frame(self.master)
         self.result_img_frame.pack()
 
-        # perform the search
-        
-        ch_results = self.color_hist_searcher.search(self.queryfeatures)
-        vw_results = self.bow_searcher.search(self.query)
-        dp_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
+        features = [False, False, False, False, False]
+        for f in selected_features:
+            features[f] = True
 
-        '''put the results from different features into the list below using append'''
+        # perform the search and put the results from different features into the list below using append
         results_list = []
-        results_list.append(dp_results)
+        if features[0]: # Color Histogram
+            ch_results = self.color_hist_searcher.search(self.queryfeatures)
+            results_list.append(ch_results)
+        if features[1]: # Visual Keywords
+            vw_results = self.bow_searcher.search(self.query)
+            results_list.append(vw_results)
+        if features[2] or features[3]:
+            dp_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
+            if features[2]: # Visual Concept
+                results_list.append(vc_results)
+            if features[3]: # Deep Learning
+                results_list.append(dp_results)
 
         results = combine_results(self.image_ids, results_list)
         results = sorted([(v, k) for (k, v) in results.items()])
