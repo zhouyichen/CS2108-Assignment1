@@ -71,8 +71,8 @@ class UI_class:
 
         # perform the search
         
-        color_results = self.color_hist_searcher.search(self.queryfeatures)
-        bow_results = self.bow_searcher.search(self.query)
+        ch_results = self.color_hist_searcher.search(self.queryfeatures)
+        vw_results = self.bow_searcher.search(self.query)
         dp_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
 
         '''put the results from different features into the list below using append'''
