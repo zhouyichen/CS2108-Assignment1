@@ -2,16 +2,20 @@
 from params import *
 from pyimagesearch.color_hist_searcher import *
 from pyimagesearch.bow_searcher import *
+from pyimagesearch.deep_learning_searcher import *
 from Tkinter import *
 import tkFileDialog
 from PIL import Image, ImageTk
 
 def combine_results(image_ids, results):
-    final_result = {}
-    for image_id in image_ids:
-        score = reduce(lambda x, y: x*y, (r[image_id] for r in results))
-        final_result[image_id] = score
-    return final_result
+    if len(results) > 1:
+        final_result = {}
+        for image_id in image_ids:
+            score = reduce(lambda x, y: x*y, (r[image_id] for r in results))
+            final_result[image_id] = score
+        return final_result
+    else:
+        return results[0]
 
 class UI_class:
     def __init__(self, master, search_path):
@@ -22,6 +26,7 @@ class UI_class:
 
         self.color_hist_searcher = ColorHistSearcher(color_hist_train_data)
         self.bow_searcher = BOW_Searcher(bow_train_data)
+        self.deep_learning_searcher = DeepLearningSearcher(deep_learning_train_data, visual_concept_train_data)
         self.image_ids = self.bow_searcher.image_ids
 
         #Buttons
@@ -33,7 +38,6 @@ class UI_class:
         downspace = Label(topframe).grid(row=3, columnspan=4)
 
         self.master.mainloop()
-
 
 
     def browse_query_img(self):
@@ -69,11 +73,12 @@ class UI_class:
         
         color_results = self.color_hist_searcher.search(self.queryfeatures)
         bow_results = self.bow_searcher.search(self.query)
+        dp_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
 
-        results = combine_results(self.image_ids, (color_results, bow_results))
-        results = sorted([(v, k) for (k, v) in bow_results.items()])
+        results = combine_results(self.image_ids, (color_results, bow_results, dp_results))
+        results = sorted([(v, k) for (k, v) in results.items()])
 
-        # show result pictures
+        # show result picturesdp_results
         COLUMNS = 5
         image_count = 0
         for (score, resultID) in results[:20]:
