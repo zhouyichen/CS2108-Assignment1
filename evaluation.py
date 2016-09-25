@@ -8,7 +8,7 @@ VC = 'Visual Concept'
 
 methods = [CH, DL, VW, VC]
 
-def read_single_results_file(filename):
+def read_single_results_file(filename, sorted_list=True):
     results = []
 
     # open the sift feature file for reading
@@ -19,12 +19,18 @@ def read_single_results_file(filename):
         # loop over the rows in the index
         for row in reader:
 			results_raw = row[1:]
-			result_list = [[float(results_raw[i]), results_raw[i+1]] for i in range(0, len(results_raw), 2)]
+			if sorted_list:
+				result_list = [[float(results_raw[i]), results_raw[i+1]] for i in range(0, len(results_raw), 2)]
+			else:
+				result_list = {}
+				for i in range(0, len(results_raw), 2):
+					result_list[results_raw[i+1]] = float(results_raw[i])
 			results.append((row[0], result_list))
 
         # close the reader
         f.close()
     return results
+
 
 def get_category_and_id(image_id):
     s = image_id.find("/")
@@ -108,5 +114,52 @@ def run_evalutaion_for_all_single_method():
 	output.write("%s," % (vw_map[i][1]))
 	output.write("%s\n" % (vc_map[i][1]))
 
+def combine_results(image_ids, results):
+    if len(results) > 1:
+		final_result = {}
+		for image_id in image_ids:
+			score = sum(r[0][image_id] * r[1] for r in results)
+	    	final_result[image_id] = score
+		return final_result
+    else:
+        return results[0][0]
+
+def find_weights_for_combination():
+	ch_dict = read_single_results_file(ch_results, sorted_list=False)
+	dl_dict = read_single_results_file(dl_results, sorted_list=False)
+	vw_dict = read_single_results_file(vw_results, sorted_list=False)
+	vc_dict = read_single_results_file(vc_results, sorted_list=False)
+
+	small_weights = [1, 2, 4]
+	large_weights = [10, 20, 40, 80]
+
+	comb_resulst = []
+	image_ids = ch_dict[0][1].keys()
+
+	for ch_weight in small_weights:
+		for vw_weight in small_weights:
+			for dl_weight in large_weights:
+				for vc_weight in large_weights:
+					ch_weight = ch_weight / 4
+					sum_MAP = 0
+					for i in range(TOTAL_NUMBER_OF_TESTS):
+						image_id = ch_dict[i][0]
+						result_list = []
+						result_list.append([ch_dict[i][1], ch_weight])
+						result_list.append([dl_dict[i][1], dl_weight])
+						result_list.append([vw_dict[i][1], vw_weight])
+						result_list.append([vc_dict[i][1], vc_weight])
+						combined = combine_results(image_ids, result_list)
+						print combined
+						combined = sorted([(v, k) for (k, v) in combined.items()])
+						top_results = get_top_resutls(combined, TOP_RESULTS_NUMBER)
+						precision = calculate_precision(image_id, top_results)
+						sum_MAP += precision
+					comb_resulst = [[ch_weight, vw_weight, dl_weight, vc_weight], sum_MAP/TOTAL_NUMBER_OF_TESTS]
+					print(comb_resulst)
+	return comb_resulst
+
 if __name__ == "__main__":
-	run_evalutaion_for_all_single_method()
+	result = find_weights_for_combination()
+	# for i in result:
+	# 	print i
