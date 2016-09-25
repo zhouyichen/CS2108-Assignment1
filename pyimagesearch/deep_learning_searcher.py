@@ -116,6 +116,13 @@ def calculate_vc_results(visual_concepts, vc_list):
 		results[image_id] = distance
 	return results
 
+def calculate_dl_results(queryFeatures, dp_list):
+	results = {}
+	for image_id, features in dp_list:
+		d = np.linalg.norm(queryFeatures - features)
+		results[image_id] = d
+	return results
+
 def read_vc_data_file(filename):
 	vc_list = []
 	with open(filename) as f:
@@ -213,12 +220,8 @@ class DeepLearningSearcher(object):
 			vc_match_results = self.search_by_visual_concepts(visual_concepts)
 		return (dp_match_results, vc_match_results)
 
-	def search_by_deep_learning(self, queryFeatures, weight=1):
-		results = {}
-		for image_id, features in self.dp_list:
-			d = np.linalg.norm(queryFeatures - features)
-			results[image_id] = d * weight
-		return results
+	def search_by_deep_learning(self, queryFeatures):
+		return calculate_dl_results(queryFeatures, self.dp_list)
 
 	def search_by_visual_concepts(self, visual_concepts):
 		return calculate_vc_results(visual_concepts, self.vc_list)
