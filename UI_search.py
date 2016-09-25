@@ -7,16 +7,40 @@ from Tkinter import *
 import tkFileDialog
 import tkMessageBox
 from PIL import Image, ImageTk
+from evaluation import get_category_and_id
 
 def combine_results(image_ids, results):
     if len(results) > 1:
         final_result = {}
         for image_id in image_ids:
-            score = reduce(lambda x, y: x + y, (r[image_id] for r in results))
+            score = sum(r[0][image_id] * r[1] for r in results)
             final_result[image_id] = score
         return final_result
     else:
-        return results[0]
+        return results[0][0]
+
+def get_top_resutls(results, number):
+    '''
+    get the top N results, and combine duplicate images with different category names
+    '''
+    top_results = []
+    index = 0
+    top = 0
+    while top < number:
+        score, image = results[index]
+        category, image_id = get_category_and_id(image)
+        index += 1
+        for j in range(index, len(results)):
+            next_image = results[j][1]
+            next_category, next_id = get_category_and_id(next_image)
+            if image_id == next_id:
+                index += 1
+            else:
+                top_results.append([score, image])
+                break
+        top += 1
+    return top_results
+
 
 class UI_class:
     def __init__(self, master, search_path):
@@ -100,16 +124,20 @@ class UI_class:
         results_list = []
         if features[0]: # Color Histogram
             ch_results = self.color_hist_searcher.search(self.queryfeatures)
-            results_list.append(ch_results)
+            results_list.append([ch_results, weights_for_methods[CH]])
         if features[1]: # Visual Keywords
             vw_results = self.bow_searcher.search(self.query)
-            results_list.append(vw_results)
+            results_list.append([vw_results, weights_for_methods[VW]])
         if features[2] and features[3]: # Visual Concept and Deep Learning
-            dp_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
-            results_list.append(vc_results)
-            results_list.append(dp_results)
-        elif features[2] or features[3]: # Visual Concept or Deep Learning
-            results_list.append(self.deep_learning_searcher.run_inference_on_image(self.filename, features[3], features[2])[0])
+            dl_results, vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename)
+            results_list.append([vc_results, weights_for_methods[VC]])
+            results_list.append([dl_results, weights_for_methods[DL]])
+        elif features[2]:  # Visual Concept
+            vc_results = self.deep_learning_searcher.run_inference_on_image(self.filename, False, True)[0]
+            results_list.append([vc_results, weights_for_methods[VC]])
+        elif features[3]:  # Deep Learning
+            dl_results = self.deep_learning_searcher.run_inference_on_image(self.filename, True, False)[0]
+            results_list.append([dl_results, weights_for_methods[DL]])
                 
         results = combine_results(self.image_ids, results_list)
         results = sorted([(v, k) for (k, v) in results.items()])
@@ -117,7 +145,8 @@ class UI_class:
         # show result picturesdp_results
         COLUMNS = 5
         image_count = 0
-        for (score, resultID) in results[:20]:
+        top_results = get_top_resutls(results, 15)
+        for (score, resultID) in top_results:
             # load the result image and display it
             image_count += 1
             r, c = divmod(image_count - 1, COLUMNS)
