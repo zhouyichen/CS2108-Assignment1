@@ -27,3 +27,39 @@ dl_results = "dl_predictions.csv"
 vc_results = "vc_predictions.csv"
 
 TOP_RESULTS_NUMBER = 16
+TOTAL_NUMBER_OF_TESTS = 300
+NUMBER_OF_CATEGORIES = 30
+NUMBER_OF_TEST_IN_EACH_CAT = 10
+
+category_names = [
+	'alley',
+	'antlers',
+	'baby',
+	'balloons',
+	'beach',
+	'bear',
+	'birds',
+	'boats',
+	'cars',
+	'cat',
+	'computer',
+	'coral',
+	'dog',
+	'fish',
+	'flags',
+	'flowers',
+	'horses',
+	'leaf',
+	'plane',
+	'rainbow',
+	'rocks',
+	'sign',
+	'snow',
+	'tiger',
+	'tower',
+	'train',
+	'tree',
+	'whales',
+	'window',
+	'zebra'
+]
