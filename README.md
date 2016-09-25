@@ -7,8 +7,10 @@ Run the following in terminal to extract features of the training and testing da
 
 ```
 python color_hist.py
-python sift.py
 python deep_learning_features.py
+python sift.py
+python sift_clustering.py 300
+python bag_of_words.py 300
 ```
 
 Run the UI by: `python UI_search.py`
