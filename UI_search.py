@@ -12,7 +12,7 @@ def combine_results(image_ids, results):
     if len(results) > 1:
         final_result = {}
         for image_id in image_ids:
-            score = reduce(lambda x, y: x*y, (r[image_id] for r in results))
+            score = reduce(lambda x, y: x + y, (r[image_id] for r in results))
             final_result[image_id] = score
         return final_result
     else:
