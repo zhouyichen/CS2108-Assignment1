@@ -116,13 +116,31 @@ def calculate_vc_results(visual_concepts, vc_list):
 		results[image_id] = distance
 	return results
 
+def read_vc_data_file(filename):
+	vc_list = []
+	with open(filename) as f:
+		# initialize the CSV reader
+		reader = csv.reader(f)
+
+		# loop over the rows in the index
+		for row in reader:
+			train_vc_raw = row[1:]
+			train_vc = {}
+			for x in range(0, len(row)-1, 2):
+				train_vc[train_vc_raw[x]] = float(train_vc_raw[x+1])
+			vc_list.append([row[0], train_vc])
+			
+		# close the reader
+		f.close()
+	return vc_list
+
 class DeepLearningSearcher(object):
 	def __init__(self, deep_learning_data, visual_concept_data):
 		# store our index path
 		self.deep_learning_data = deep_learning_data
 		self.visual_concept_data = visual_concept_data
 		self.dp_list = []
-		self.vc_list = []
+		
 		self.node_lookup = NodeLookup()
 
 		with open(self.deep_learning_data) as f:
@@ -136,20 +154,7 @@ class DeepLearningSearcher(object):
 			# close the reader
 			f.close()
 
-		with open(self.visual_concept_data) as f:
-			# initialize the CSV reader
-			reader = csv.reader(f)
-
-			# loop over the rows in the index
-			for row in reader:
-				train_vc_raw = row[1:]
-				train_vc = {}
-				for x in range(0, len(row)-1, 2):
-					train_vc[train_vc_raw[x]] = float(train_vc_raw[x+1])
-				self.vc_list.append([row[0], train_vc])
-				
-			# close the reader
-			f.close()
+		self.vc_list = read_vc_data_file(visual_concept_data)
 
 		"""Creates a graph from saved GraphDef file and returns a saver."""
 		# Creates graph from saved graph_def.pb.
