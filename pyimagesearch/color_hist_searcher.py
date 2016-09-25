@@ -14,7 +14,7 @@ class ColorHistSearcher:
 
 			# loop over the rows in the index
 			for row in reader:
-				self.features_list.append(row)
+				self.features_list.append([row[0], np.array(row[1:], dtype = np.dtype(float))])
 
 			# close the reader
 			f.close()
@@ -24,9 +24,8 @@ class ColorHistSearcher:
 		results = {}
 
 			# loop over the rows in the index
-		for row in self.features_list:
+		for image_id, features in self.features_list:
 
-			features = np.array(row[1:], dtype = np.dtype(float))
 			d = chi2_distance(features, queryFeatures)
 
 			# now that we have the distance between the two feature
@@ -34,7 +33,7 @@ class ColorHistSearcher:
 			# key is the current image ID in the index and the
 			# value is the distance we just computed, representing
 			# how 'similar' the image in the index is to our query
-			results[row[0]] = d * weight
+			results[image_id] = d * weight
 
 		# sort our results, so that the smaller distances (i.e. the
 		# more relevant images are at the front of the list)

@@ -107,7 +107,7 @@ class DeepLearningSearcher(object):
 
 			# loop over the rows in the index
 			for row in reader:
-				self.dp_list.append(row)
+				self.dp_list.append([row[0], np.array(row[1:], dtype = np.dtype(float))])
 				
 			# close the reader
 			f.close()
@@ -118,7 +118,11 @@ class DeepLearningSearcher(object):
 
 			# loop over the rows in the index
 			for row in reader:
-				self.vc_list.append(row)
+				train_vc_raw = row[1:]
+				train_vc = {}
+				for x in range(0, len(row)-1, 2):
+					train_vc[train_vc_raw[x]] = float(train_vc_raw[x+1])
+				self.vc_list.append([row[0], train_vc])
 				
 			# close the reader
 			f.close()
@@ -182,20 +186,15 @@ class DeepLearningSearcher(object):
 
 	def search_by_deep_learning(self, queryFeatures, weight=1):
 		results = {}
-		for row in self.dp_list:
-			features = np.array(row[1:], dtype = np.dtype(float))
+		for image_id, features in self.dp_list:
 			d = np.linalg.norm(queryFeatures - features)
-			results[row[0]] = d * weight
+			results[image_id] = d * weight
 		return results
 
 	def search_by_visual_concepts(self, visual_concepts, weight = 1):
 		results = {}
 		# query_vc = list(filter(lambda x: x[1] > 0.05, visual_concepts))
-		for row in self.vc_list:
-			train_vc_raw = row[1:]
-			train_vc = {}
-			for x in range(0, len(row)-1, 2):
-				train_vc[train_vc_raw[x]] = float(train_vc_raw[x+1])
+		for image_id, train_vc in self.vc_list:
 
 			'''
 			train_vc and visual_concepts have the same format:
@@ -214,7 +213,7 @@ class DeepLearningSearcher(object):
 				else:
 					distance += prob
 
-			results[row[0]] = distance * weight
+			results[image_id] = distance * weight
 		return results
 
 
