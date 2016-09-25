@@ -26,6 +26,22 @@ ch_results = "ch_predictions.csv"
 dl_results = "dl_predictions.csv"
 vc_results = "vc_predictions.csv"
 
+
+CH = 'Color Histogram'
+DL = 'Deep Learning'
+VW = 'Visual Keyword'
+VC = 'Visual Concept'
+
+
+methods = [CH, VW, DL, VC]
+
+weights_for_methods = {
+	CH: 0.1,
+	VW: 0.72,
+	DL: 1000,
+	VC: 5000
+}
+
 TOP_RESULTS_NUMBER = 16
 TOTAL_NUMBER_OF_TESTS = 300
 NUMBER_OF_CATEGORIES = 30

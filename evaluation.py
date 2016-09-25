@@ -1,12 +1,6 @@
 from params import *
 import csv
 
-CH = 'Color Histogram'
-DL = 'Deep Learning'
-VW = 'Visual Keyword'
-VC = 'Visual Concept'
-
-methods = [CH, DL, VW, VC]
 
 def read_single_results_file(filename, sorted_list=True):
     results = []
@@ -119,7 +113,7 @@ def combine_results(image_ids, results):
 		final_result = {}
 		for image_id in image_ids:
 			score = sum(r[0][image_id] * r[1] for r in results)
-	    	final_result[image_id] = score
+			final_result[image_id] = score
 		return final_result
     else:
         return results[0][0]
@@ -130,36 +124,39 @@ def find_weights_for_combination():
 	vw_dict = read_single_results_file(vw_results, sorted_list=False)
 	vc_dict = read_single_results_file(vc_results, sorted_list=False)
 
-	small_weights = [1, 2, 4]
-	large_weights = [10, 20, 40, 80]
+	small_weights = [7.2]
+	large_weights = [1]
+	# vc_weights = [1000, 2000]
 
 	comb_resulst = []
 	image_ids = ch_dict[0][1].keys()
 
-	for ch_weight in small_weights:
-		for vw_weight in small_weights:
-			for dl_weight in large_weights:
-				for vc_weight in large_weights:
-					ch_weight = ch_weight / 4
-					sum_MAP = 0
-					for i in range(TOTAL_NUMBER_OF_TESTS):
-						image_id = ch_dict[i][0]
-						result_list = []
-						result_list.append([ch_dict[i][1], ch_weight])
-						result_list.append([dl_dict[i][1], dl_weight])
-						result_list.append([vw_dict[i][1], vw_weight])
-						result_list.append([vc_dict[i][1], vc_weight])
-						combined = combine_results(image_ids, result_list)
-						print combined
-						combined = sorted([(v, k) for (k, v) in combined.items()])
-						top_results = get_top_resutls(combined, TOP_RESULTS_NUMBER)
-						precision = calculate_precision(image_id, top_results)
-						sum_MAP += precision
-					comb_resulst = [[ch_weight, vw_weight, dl_weight, vc_weight], sum_MAP/TOTAL_NUMBER_OF_TESTS]
-					print(comb_resulst)
+
+	ch_weight = 1
+	for vw_weight in small_weights:
+		for dl_weight in large_weights:
+			for vc_weight in large_weights:
+				sum_MAP = 0
+				for i in range(TOTAL_NUMBER_OF_TESTS):
+					image_id = ch_dict[i][0]
+					result_list = []
+					result_list.append([ch_dict[i][1], ch_weight])
+					result_list.append([vw_dict[i][1], vw_weight])
+					# result_list.append([dl_dict[i][1], dl_weight])
+					# result_list.append([vc_dict[i][1], vc_weight])
+					combined = combine_results(image_ids, result_list)
+					combined = sorted([(v, k) for (k, v) in combined.items()])
+					top_results = get_top_resutls(combined, TOP_RESULTS_NUMBER)
+					precision = calculate_precision(image_id, top_results)
+					sum_MAP += precision
+				comb_resulst.append([[ch_weight, vw_weight, dl_weight, vc_weight], sum_MAP/TOTAL_NUMBER_OF_TESTS])
 	return comb_resulst
 
 if __name__ == "__main__":
 	result = find_weights_for_combination()
-	# for i in result:
-	# 	print i
+
+	result.sort( key=lambda i: i[1], reverse=True)
+	for i in result:
+		print i
+
+
