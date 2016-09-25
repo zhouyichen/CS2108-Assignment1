@@ -185,15 +185,17 @@ class DeepLearningSearcher(object):
 		for row in self.dp_list:
 			features = np.array(row[1:], dtype = np.dtype(float))
 			d = np.linalg.norm(queryFeatures - features)
-
 			results[row[0]] = d * weight
 		return results
 
 	def search_by_visual_concepts(self, visual_concepts, weight = 1):
 		results = {}
+		# query_vc = list(filter(lambda x: x[1] > 0.05, visual_concepts))
 		for row in self.vc_list:
 			train_vc_raw = row[1:]
-			train_vc = [[train_vc_raw[x], float(train_vc_raw[x+1])] for x in range(0, len(row)-1, 2)]
+			train_vc = {}
+			for x in range(0, len(row)-1, 2):
+				train_vc[train_vc_raw[x]] = float(train_vc_raw[x+1])
 
 			'''
 			train_vc and visual_concepts have the same format:
@@ -203,7 +205,14 @@ class DeepLearningSearcher(object):
 			The distance should be calculated based on train_vc and visual_concepts.
 			Lower distance represents better match between the two images
 			'''
-			distance = 1.0 # to be fixed
+			# train_vc = list(filter(lambda x: x[1] > 0.05, train_vc))
+
+			distance = 0.0 # to be fixed
+			for visual_concept, prob in visual_concepts:
+				if visual_concept in train_vc:
+					distance += np.abs(prob - train_vc[visual_concept])
+				else:
+					distance += prob
 
 			results[row[0]] = distance * weight
 		return results
