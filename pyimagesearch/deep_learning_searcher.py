@@ -91,6 +91,30 @@ class NodeLookup(object):
       return ''
     return self.node_lookup[node_id]
 
+def calculate_vc_results(visual_concepts, vc_list):
+	results = {}
+	# query_vc = list(filter(lambda x: x[1] > 0.05, visual_concepts))
+	for image_id, train_vc in vc_list:
+
+		'''
+		train_vc and visual_concepts have the same format:
+			List containing 5 elements, each element is a list containing:
+				visual_concept_string and probablity_of_the_concept
+			Both train_vc and visual_concepts are sorted according to the score
+		The distance should be calculated based on train_vc and visual_concepts.
+		Lower distance represents better match between the two images
+		'''
+		# train_vc = list(filter(lambda x: x[1] > 0.05, train_vc))
+
+		distance = 0.0 # to be fixed
+		for visual_concept, prob in visual_concepts:
+			if visual_concept in train_vc:
+				distance += np.abs(prob - train_vc[visual_concept])
+			else:
+				distance += prob
+
+		results[image_id] = distance
+	return results
 
 class DeepLearningSearcher(object):
 	def __init__(self, deep_learning_data, visual_concept_data):
@@ -191,29 +215,7 @@ class DeepLearningSearcher(object):
 			results[image_id] = d * weight
 		return results
 
-	def search_by_visual_concepts(self, visual_concepts, weight = 1):
-		results = {}
-		# query_vc = list(filter(lambda x: x[1] > 0.05, visual_concepts))
-		for image_id, train_vc in self.vc_list:
-
-			'''
-			train_vc and visual_concepts have the same format:
-				List containing 5 elements, each element is a list containing:
-					visual_concept_string and probablity_of_the_concept
-				Both train_vc and visual_concepts are sorted according to the score
-			The distance should be calculated based on train_vc and visual_concepts.
-			Lower distance represents better match between the two images
-			'''
-			# train_vc = list(filter(lambda x: x[1] > 0.05, train_vc))
-
-			distance = 0.0 # to be fixed
-			for visual_concept, prob in visual_concepts:
-				if visual_concept in train_vc:
-					distance += np.abs(prob - train_vc[visual_concept])
-				else:
-					distance += prob
-
-			results[image_id] = distance * weight
-		return results
+	def search_by_visual_concepts(self, visual_concepts):
+		return calculate_vc_results(visual_concepts, self.vc_list)
 
 
