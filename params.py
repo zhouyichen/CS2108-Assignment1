@@ -19,9 +19,11 @@ visual_concept_test_data = "visualConcept_test.csv"
 sift_train_data = "siftDescriptors_train.csv"
 sift_test_data = "siftDescriptors_test.csv"
 
-bow_train_data = "bow250.pkl"
+bow_train_data = "bow300.pkl"
 
-vw_results = "vw_predictions250.csv"
+vw_results = "vw_predictions300.csv"
 ch_results = "ch_predictions.csv"
 dl_results = "dl_predictions.csv"
 vc_results = "vc_predictions.csv"
+
+TOP_RESULTS_NUMBER = 16
