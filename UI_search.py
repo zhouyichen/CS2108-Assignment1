@@ -6,6 +6,7 @@ from pyimagesearch.deep_learning_searcher import *
 from Tkinter import *
 import tkFileDialog
 import tkMessageBox
+import os.path
 from PIL import Image, ImageTk
 from evaluation import get_category_and_id
 
@@ -19,7 +20,7 @@ def combine_results(image_ids, results):
     else:
         return results[0][0]
 
-def get_top_resutls(results, number):
+def get_top_resutls(results, number, categories):
     '''
     get the top N results, and combine duplicate images with different category names
     '''
@@ -30,15 +31,16 @@ def get_top_resutls(results, number):
         score, image = results[index]
         category, image_id = get_category_and_id(image)
         index += 1
-        for j in range(index, len(results)):
-            next_image = results[j][1]
-            next_category, next_id = get_category_and_id(next_image)
-            if image_id == next_id:
-                index += 1
-            else:
-                top_results.append([score, image])
-                break
-        top += 1
+        if category in categories:
+            for j in range(index, len(results)):
+                next_image = results[j][1]
+                next_category, next_id = get_category_and_id(next_image)
+                if image_id == next_id:
+                    index += 1
+                else:
+                    top_results.append([score, image])
+                    break
+            top += 1
     return top_results
 
 
@@ -63,7 +65,6 @@ class UI_class:
             "Visual Keywords",
             "Visual Concept",
             "Deep Learning",
-            "Text"
         ]
         self.listbox = Listbox(topframe, selectmode=MULTIPLE)
         for feature in feature_options:
@@ -74,7 +75,6 @@ class UI_class:
         downspace = Label(topframe).grid(row=3, columnspan=4)
 
         self.master.mainloop()
-
 
     def browse_query_img(self):
         self.filename = tkFileDialog.askopenfile(title='Choose an Image File').name
@@ -142,10 +142,32 @@ class UI_class:
         results = combine_results(self.image_ids, results_list)
         results = sorted([(v, k) for (k, v) in results.items()])
 
-        # show result picturesdp_results
+        self.display_imgs(results, category_names)
+
+    def show_relevant_imgs(self, image_id, results):
+        self.result_img_frame.pack_forget()
+        self.result_img_frame = Frame(self.master)
+        self.result_img_frame.pack()
+        
+        s = image_id.find("/")
+        raw_image_id = image_id[s+1:]
+
+        input_categories = []
+
+        for c in category_names:
+            if os.path.isfile(self.search_path + "/" + c + "/" + raw_image_id):
+                input_categories.append(c)
+ 
+		self.display_imgs(results, input_categories)
+
+		self.result_img_frame.mainloop()
+
+    def display_imgs(self, results, categories):
+    	# show result picturesdp_results
+        Label(self.result_img_frame, text="Click a image to get similar images")
         COLUMNS = 5
         image_count = 0
-        top_results = get_top_resutls(results, 15)
+        top_results = get_top_resutls(results, 15, categories)
         for (score, resultID) in top_results:
             # load the result image and display it
             image_count += 1
@@ -153,12 +175,13 @@ class UI_class:
             im = Image.open( self.search_path + "/" + resultID)
             resized = im.resize((100, 100), Image.ANTIALIAS)
             tkimage = ImageTk.PhotoImage(resized)
-            myvar = Label(self.result_img_frame, image=tkimage)
+            def get_relevance_feedback(i=resultID, r=results):
+            	self.show_relevant_imgs(i, r)
+            myvar = Button(self.result_img_frame, image=tkimage, command=get_relevance_feedback)
             myvar.image = tkimage
             myvar.grid(row=r, column=c)
-
+            
         self.result_img_frame.mainloop()
-
 
 root = Tk()
 window = UI_class(root,'dataset/train/data')
