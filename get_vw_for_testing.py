@@ -67,6 +67,6 @@ def get_vw_for_testing(output_file, sift_data, sift_bow_data):
     output.close()
 
 if __name__ == "__main__":
-    get_vw_for_testing(vw_results, sift_test_data, "bow250.pkl")
+    get_vw_for_testing(vw_results, sift_test_data, bow_train_data)
 
 
